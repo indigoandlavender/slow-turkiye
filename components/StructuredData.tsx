@@ -2,52 +2,47 @@ export default function StructuredData() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
-    name: "Slow Morocco",
-    description: "Thoughtful private journeys across Morocco — designed for travellers who prefer ease and deep immersion.",
-    url: "https://slowmorocco.com",
-    telephone: "+212618070450",
-    email: "hello@slowmorocco.com",
+    name: "Slow Türkiye",
+    description: "Thoughtful private journeys across Türkiye — designed for travellers who prefer ease and deep immersion.",
+    url: "https://slowturkiye.com",
+    email: "hello@slowturkiye.com",
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Marrakech",
-      addressCountry: "MA",
+      addressLocality: "Istanbul",
+      addressCountry: "TR",
     },
     areaServed: {
       "@type": "Country",
-      name: "Morocco",
+      name: "Turkey",
     },
-    image: "https://slowmorocco.com/og-image.jpg",
+    image: "https://slowturkiye.com/og-image.jpg",
     priceRange: "€€€",
-    sameAs: [
-      "https://www.instagram.com/slowmorocco",
-      "https://www.pinterest.com/slowmorocco",
-    ],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Morocco Private Journeys",
+      name: "Türkiye Private Journeys",
       itemListElement: [
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "TouristTrip",
-            name: "3-Day Sahara Circle",
-            description: "Desert adventure from Marrakech to Merzouga",
+            name: "Cappadocia Discovery",
+            description: "Fairy chimneys, cave hotels, and hot air balloons",
           },
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "TouristTrip",
-            name: "8-Day Imperial Cities",
-            description: "Discover Marrakech, Fes, Meknes, and Rabat",
+            name: "Aegean Coast",
+            description: "Ancient ruins and turquoise waters",
           },
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "TouristTrip",
-            name: "12-Day Grand Tour",
-            description: "The complete Morocco experience",
+            name: "Istanbul & Beyond",
+            description: "Where East meets West",
           },
         },
       ],
