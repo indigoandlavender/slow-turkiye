@@ -1,222 +1,230 @@
 import Link from "next/link";
-import { getSheetData } from "@/lib/sheets";
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-interface PageSection {
-  page_id: string;
-  page_title: string;
-  section_order: number;
-  section_title: string;
-  section_content: string;
-  section_type?: string;
-  section_image?: string;
-}
-
-interface AboutSettings {
-  hero_title?: string;
-  hero_subtitle?: string;
-  hero_image?: string;
-  quote_text?: string;
-}
-
-async function getAboutContent() {
-  try {
-    // Get page sections from Website_Pages
-    const pagesData = await getSheetData("Website_Pages");
-    const aboutSections = pagesData
-      .filter((row: any) => row.page_id === "about")
-      .sort((a: any, b: any) => (parseInt(a.section_order) || 0) - (parseInt(b.section_order) || 0));
-
-    // Get settings for hero/quote from Website_Settings
-    const settingsData = await getSheetData("Website_Settings");
-    const settings: { [key: string]: string } = {};
-    settingsData.forEach((row: any) => {
-      if (row.Key) settings[row.Key] = row.Value || "";
-    });
-
-    return {
-      sections: aboutSections as PageSection[],
-      settings: {
-        hero_title: settings.about_hero_title || "A B O U T\nU S",
-        hero_subtitle: settings.about_hero_subtitle || "A different kind of travel company, built on honesty and human connection.",
-        hero_image: settings.about_hero_image || "",
-        quote_text: settings.about_quote || "We'd rather lose a booking than promise something we can't deliver.",
-        site_name: settings.site_name || "Slow World",
-      } as AboutSettings & { site_name: string },
-    };
-  } catch (error) {
-    console.error("Error fetching about content:", error);
-    return {
-      sections: [],
-      settings: {
-        hero_title: "A B O U T\nU S",
-        hero_subtitle: "A different kind of travel company, built on honesty and human connection.",
-        hero_image: "",
-        quote_text: "We'd rather lose a booking than promise something we can't deliver.",
-        site_name: "Slow World",
-      },
-    };
-  }
-}
-
-export default async function AboutPage() {
-  const { sections, settings } = await getAboutContent();
-
-  // Group sections by type for different rendering
-  const introSections = sections.filter(s => s.section_type === "intro" || s.section_order <= 3);
-  const standardSections = sections.filter(s => s.section_type === "standard" || (!s.section_type && s.section_order > 3 && s.section_order < 90));
-  const valuesSections = sections.filter(s => s.section_type === "values");
-
-  // If no sections from database, show a message
-  const hasContent = sections.length > 0;
-
+export default function AboutPage() {
   return (
-    <div className="bg-background min-h-screen">
-      {/* Hero Section */}
-      <section 
-        className="pt-32 pb-20 md:pt-40 md:pb-28 bg-muted"
-        style={settings.hero_image ? {
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${settings.hero_image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : undefined}
-      >
-        <div className="container mx-auto px-6 lg:px-16 text-center max-w-4xl">
-          <h1 className={`text-4xl md:text-6xl lg:text-7xl tracking-[0.3em] font-light mb-8 whitespace-pre-line ${settings.hero_image ? 'text-white' : ''}`}>
-            {settings.hero_title}
-          </h1>
-          <p className={`text-lg md:text-xl ${settings.hero_image ? 'text-white/90' : 'text-muted-foreground'}`}>
-            {settings.hero_subtitle}
+    <div className="bg-[#0a0a0a] text-white min-h-screen">
+      {/* Hero - Full viewport */}
+      <section className="min-h-screen flex flex-col justify-center relative">
+        <div className="absolute inset-0 bg-[url('/grain.png')] opacity-[0.03] pointer-events-none" />
+        
+        <div className="container mx-auto px-6 lg:px-16 py-32">
+          <div className="max-w-5xl">
+            <p className="text-xs tracking-[0.4em] uppercase text-white/40 mb-8">
+              Slow Türkiye
+            </p>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.1] mb-8">
+              We don't sell tours.
+              <br />
+              <span className="text-white/40">We solve a problem.</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/60 max-w-2xl leading-relaxed">
+              The problem is this: Türkiye is impossible to do well on your own. Too vast. Too complex. Too many layers of history fighting for attention.
+            </p>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
+          <div className="w-px h-16 bg-gradient-to-b from-white/0 via-white/20 to-white/0" />
+        </div>
+      </section>
+
+      {/* The Problem - Two column */}
+      <section className="py-24 md:py-32 border-t border-white/10">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-serif mb-6">The Problem</h2>
+            </div>
+            <div className="space-y-6 text-white/60 text-lg leading-relaxed">
+              <p>
+                You've seen the photos. The balloons over Cappadocia. The Blue Mosque at sunset. The turquoise coast.
+              </p>
+              <p>
+                What you haven't seen: the 47 tour buses arriving at Pamukkale before 9am. The "authentic" carpet demonstration that's actually a 3-hour sales pitch. The cruise ship crowds turning Ephesus into a theme park.
+              </p>
+              <p>
+                The standard Türkiye trip is a masterclass in missing the point. You see everything and experience nothing. You take a thousand photos and remember none of them.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pull Quote */}
+      <section className="py-20 md:py-28 bg-[#0d0d0d] border-y border-white/10">
+        <div className="container mx-auto px-6 lg:px-16 max-w-4xl text-center">
+          <p className="text-2xl md:text-3xl lg:text-4xl font-serif italic text-white/80 leading-relaxed">
+            "The best guide in Cappadocia doesn't work for a tour company. He's a retired geology professor who only takes guests he likes."
           </p>
         </div>
       </section>
 
-      {hasContent ? (
-        <>
-          {/* Intro Sections */}
-          {introSections.length > 0 && (
-            <section className="py-20 md:py-28">
-              <div className="container mx-auto px-6 lg:px-16 max-w-3xl">
-                {introSections.map((section, index) => (
-                  <div key={index} className="mb-8 last:mb-0">
-                    {section.section_title && section.section_title !== "Introduction" && (
-                      <h2 className="text-xl md:text-2xl tracking-[0.2em] font-light mb-6">
-                        {section.section_title.toUpperCase().split('').join(' ')}
-                      </h2>
-                    )}
-                    <p className="text-muted-foreground leading-relaxed">
-                      {section.section_content}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+      {/* The People Who Stayed */}
+      <section className="py-24 md:py-32">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif mb-6">The People Who Stayed</h2>
+            <p className="text-white/60 text-lg leading-relaxed">
+              Twenty years of living in this country taught us something the guidebooks don't mention: the most interesting people in Türkiye are the ones who chose to stay.
+            </p>
+          </div>
 
-          {/* Standard Sections - alternating backgrounds */}
-          {standardSections.map((section, index) => (
-            <section 
-              key={section.section_order} 
-              className={`py-20 md:py-28 ${index % 2 === 0 ? 'bg-sand' : ''}`}
-            >
-              <div className="container mx-auto px-6 lg:px-16 max-w-3xl">
-                {section.section_title && (
-                  <h2 className="text-2xl md:text-3xl tracking-[0.3em] font-light text-center mb-16">
-                    {section.section_title.toUpperCase().split('').join(' ')}
-                  </h2>
-                )}
-                <div className="text-muted-foreground leading-relaxed space-y-6">
-                  {section.section_content.split('\n\n').map((paragraph, pIndex) => (
-                    <p key={pIndex}>{paragraph}</p>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ))}
-
-          {/* Quote Section */}
-          {settings.quote_text && (
-            <section className="py-16 md:py-24 bg-sand">
-              <div className="container mx-auto px-6 lg:px-16 max-w-4xl text-center">
-                <p className="font-serif text-2xl md:text-4xl italic text-foreground leading-relaxed">
-                  "{settings.quote_text}"
-                </p>
-              </div>
-            </section>
-          )}
-
-          {/* Values/Standards Section */}
-          {valuesSections.length > 0 && (
-            <section className="py-20 md:py-28">
-              <div className="container mx-auto px-6 lg:px-16">
-                <h2 className="text-2xl md:text-3xl tracking-[0.3em] font-light text-center mb-16">
-                  O U R &nbsp; S T A N D A R D S
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                  {valuesSections.map((section, index) => (
-                    <div key={index} className="border-l border-border pl-6">
-                      <h3 className="text-sm tracking-[0.2em] uppercase mb-4">
-                        {section.section_title.split(' ').map((word, i) => (
-                          <span key={i}>{word}<br/></span>
-                        ))}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {section.section_content}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-        </>
-      ) : (
-        /* Fallback content when no database content */
-        <>
-          <section className="py-20 md:py-28">
-            <div className="container mx-auto px-6 lg:px-16 max-w-3xl">
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                {settings.site_name} grew from a quiet understanding that emerged after years of guiding travelers through landscapes most never see.
-              </p>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                What we learned was simple: the most profound journeys happen not when you see more, but when you see clearly. When you stop performing and start noticing. When you remove the rush and discover what remains.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                {settings.site_name} exists for travelers who recognize that depth requires time, and clarity requires space.
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 max-w-5xl mx-auto">
+            <div className="md:mt-24">
+              <p className="text-white/60 leading-relaxed">
+                The textile merchant in the Grand Bazaar whose family has held the same shop for six generations—and who will tell you which "antique" dealers are actually selling factory reproductions from Bulgaria.
               </p>
             </div>
-          </section>
-
-          <section className="py-16 md:py-24 bg-sand">
-            <div className="container mx-auto px-6 lg:px-16 max-w-4xl text-center">
-              <p className="font-serif text-2xl md:text-4xl italic text-foreground leading-relaxed">
-                "{settings.quote_text}"
+            <div>
+              <p className="text-white/60 leading-relaxed">
+                The olive oil producer in the Aegean hills who understands that Turkish breakfast isn't a meal—it's a philosophy. Two hours minimum. Forty small dishes. No rushing.
               </p>
             </div>
-          </section>
-        </>
-      )}
+            <div>
+              <p className="text-white/60 leading-relaxed">
+                The archaeologist who has spent thirty years at Göbekli Tepe and can explain why this 12,000-year-old temple rewrites everything we thought we knew about human civilization.
+              </p>
+            </div>
+            <div className="md:mt-24">
+              <p className="text-white/60 leading-relaxed">
+                The hammam keeper in a small Anatolian town whose family has tended the same steam room since the Ottomans—and who knows the difference between a tourist scrub and a real one.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* CTA Section - always show */}
-      <section className="py-20 md:py-28 bg-sand">
-        <div className="container mx-auto px-6 lg:px-16 max-w-3xl text-center">
-          <h2 className="text-2xl md:text-3xl tracking-[0.3em] font-light mb-12">
-            O U R &nbsp; P R O M I S E
-          </h2>
-          <p className="text-muted-foreground leading-relaxed mb-6 italic font-display text-lg">
-            You arrive. We remove the noise. The rest is simply being here.
+      {/* The Access - Dark inset */}
+      <section className="py-24 md:py-32 bg-[#050505]">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-serif mb-8">The Access</h2>
+            <div className="space-y-6 text-white/60 text-lg leading-relaxed">
+              <p>
+                These people don't advertise. They don't need to. Their reputations travel through networks that take decades to enter.
+              </p>
+              <p>
+                We spent twenty years entering those networks. Learning who actually knows what they're talking about, and who's performing expertise for tips. Who serves the real thing, and who serves the version tourists expect.
+              </p>
+              <p>
+                When you travel with us, you're not booking a tour. You're borrowing relationships that took two decades to build.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What We Know */}
+      <section className="py-24 md:py-32 border-t border-white/10">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif mb-6">What We Know</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                Which cave hotel in Cappadocia was actually carved by monks in the 4th century, and which was carved by bulldozers in 2019.
+              </p>
+            </div>
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                The unmarked door in Gaziantep that leads to the best baklava in a city obsessed with baklava—40 layers of phyllo, hand-stretched.
+              </p>
+            </div>
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                Why the "tourist price" at the Spice Bazaar is 400% of the local price, and how to find the same saffron for what it's actually worth.
+              </p>
+            </div>
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                The boat captain on the Turquoise Coast who knows where the underwater ruins are—and when to go so you have them to yourself.
+              </p>
+            </div>
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                Which sunset viewpoint in Istanbul the photographers actually use (hint: it's not Galata Tower, and it doesn't cost anything).
+              </p>
+            </div>
+            <div className="border-l border-white/20 pl-6">
+              <p className="text-white/60 text-sm leading-relaxed">
+                The difference between çay offered as hospitality and çay offered as a sales tactic—and how to accept the first without triggering the second.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who This Is For - Split screen */}
+      <section className="border-t border-white/10">
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          {/* Left - For */}
+          <div className="bg-[#0d0d0d] p-12 md:p-16 lg:p-20">
+            <h3 className="text-xs tracking-[0.3em] uppercase text-white/40 mb-8">This is for you if</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-4">
+                <span className="text-white/40 mt-1">→</span>
+                <span className="text-white/70">You want to understand Türkiye, not just photograph it</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/40 mt-1">→</span>
+                <span className="text-white/70">You'd rather have one real conversation than fifty staged experiences</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/40 mt-1">→</span>
+                <span className="text-white/70">You trust us to say "skip this famous thing, do this unknown thing instead"</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/40 mt-1">→</span>
+                <span className="text-white/70">You have the budget for quality and the patience for depth</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Right - Not For */}
+          <div className="bg-[#080808] p-12 md:p-16 lg:p-20">
+            <h3 className="text-xs tracking-[0.3em] uppercase text-white/40 mb-8">This is not for you if</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-4">
+                <span className="text-white/30 mt-1">×</span>
+                <span className="text-white/50">You measure trips by attractions checked off</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/30 mt-1">×</span>
+                <span className="text-white/50">You need the hot air balloon photo for Instagram</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/30 mt-1">×</span>
+                <span className="text-white/50">You want the cheapest option available</span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-white/30 mt-1">×</span>
+                <span className="text-white/50">You expect five-star predictability everywhere</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 md:py-32 border-t border-white/10">
+        <div className="container mx-auto px-6 lg:px-16 text-center">
+          <p className="text-white/40 text-sm tracking-[0.2em] uppercase mb-6">
+            Ready to begin?
           </p>
-          <p className="text-muted-foreground leading-relaxed mb-12">
-            If you travel with us, this is what we offer: not perfection, but honesty. Not transformation, but space where it becomes possible.
+          <h2 className="text-3xl md:text-4xl font-serif mb-8">
+            Start with a conversation.
+          </h2>
+          <p className="text-white/50 max-w-xl mx-auto mb-12">
+            No itinerary yet. No obligation. Just a conversation about what you're looking for and whether we're the right fit.
           </p>
           <Link
             href="/plan-your-trip"
-            className="inline-block bg-foreground text-background px-10 py-4 text-xs tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors"
+            className="inline-block border border-white/20 px-12 py-5 text-xs tracking-[0.2em] uppercase hover:bg-white hover:text-[#0a0a0a] transition-colors"
           >
-            Start A Conversation
+            Begin The Conversation
           </Link>
         </div>
       </section>
