@@ -5,18 +5,24 @@ export const revalidate = 60;
 
 export async function GET() {
   try {
-    const destinationsData = await getSheetData("destinations");
+    const destinationsData = await getSheetData("Destinations");
+    const regionsData = await getSheetData("Regions");
+    
+    // Create region slug lookup
+    const regionSlugById: Record<string, string> = {};
+    regionsData.forEach((r: any) => {
+      regionSlugById[r.id] = r.slug;
+    });
     
     const destinations = destinationsData
-      .filter((d: any) => d.published === true || d.published === "TRUE")
       .map((d: any) => ({
         slug: d.slug || "",
-        title: d.title || "",
-        subtitle: d.subtitle || "",
-        region: d.region || "",
+        title: d.name || "",
+        subtitle: d.description || "",
+        region: regionSlugById[d.region_id] || "",
         heroImage: d.heroImage || "",
-        excerpt: d.excerpt || "",
-        featured: d.featured === true || d.featured === "TRUE",
+        excerpt: d.description || "",
+        featured: d.featured === true || d.featured === "TRUE" || d.featured === "True",
         order: parseInt(d.order) || 999,
       }))
       .sort((a: any, b: any) => a.order - b.order);

@@ -5,13 +5,13 @@ export const revalidate = 60;
 
 export async function GET() {
   try {
-    const regionsData = await getSheetData("regions");
+    const regionsData = await getSheetData("Regions");
     
     const regions = regionsData
       .map((r: any) => ({
         slug: r.slug || "",
-        title: r.title || "",
-        subtitle: r.subtitle || "",
+        title: r.name || "",
+        subtitle: r.description || "",
         heroImage: r.heroImage || "",
         order: parseInt(r.order) || 999,
       }))

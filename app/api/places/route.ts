@@ -5,19 +5,23 @@ export const revalidate = 60;
 
 export async function GET() {
   try {
-    const placesData = await getSheetData("places");
+    const placesData = await getSheetData("Places");
+    const destinationsData = await getSheetData("Destinations");
     
-    // Filter published and featured places, sort by order
+    // Create destination slug lookup
+    const destSlugById: Record<string, string> = {};
+    destinationsData.forEach((d: any) => {
+      destSlugById[d.id] = d.slug;
+    });
+    
     const places = placesData
-      .filter((p: any) => p.published === true || p.published === "TRUE")
       .map((p: any) => ({
         slug: p.slug || "",
-        title: p.title || "",
-        destination: p.destination || "",
-        category: p.category || "",
+        title: p.name || "",
+        destination: destSlugById[p.destination_id] || "",
+        category: p.type || "",
         heroImage: p.heroImage || "",
-        excerpt: p.excerpt || "",
-        featured: p.featured === true || p.featured === "TRUE",
+        excerpt: p.description || "",
         order: parseInt(p.order) || 999,
       }))
       .sort((a: any, b: any) => a.order - b.order);
